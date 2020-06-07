@@ -25,7 +25,7 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
-from qgis.core import QgsProject
+from qgis.core import QgsProject, QgsMapLayer
 
 # Initialize Qt resources from file resources.py
 # from .resources import *
@@ -189,11 +189,12 @@ class AutoNumbering:
         if self.first_start:
             self.first_start = False
             self.dlg = AutoNumberingDialog()
+            self.fillLayerCB()
+            self.fillFieldCB()
 
         # show the dialog
         self.dlg.show()
-        self.dlg.layerCB.currentTextChanged.connect(self.fillFieldCB)
-        self.fillLayerCB()
+        self.dlg.layerCB.currentIndexChanged.connect(self.fillFieldCB)
         # Run the dialog event loop
         result = self.dlg.exec_()
         # See if OK was pressed
@@ -204,9 +205,14 @@ class AutoNumbering:
 
     def fillLayerCB(self):
         self.dlg.layerCB.clear()
-        [self.dlg.layerCB.addItem(layer.name(), layer) for layer in self.instance.mapLayers().values()]
+        for layer in self.instance.mapLayers().values():
+            if layer.type() == QgsMapLayer.VectorLayer:
+                self.dlg.layerCB.addItem(layer.name(), layer)
+
+        # [self.dlg.layerCB.addItem(layer.name(), layer) for layer in self.instance.mapLayers().values() if layer.type() == QgsMapLayer.VectorLayer]
 
     def fillFieldCB(self):
         self.dlg.fieldCB.clear()
-        currLayer = self.dlg.layerCB.currentData()
-        [self.dlg.fieldCB.addItem(field.name(), field) for field in currLayer.fields()]
+        currLayer = self.dlg.layerCB.itemData(self.dlg.layerCB.currentIndex())
+        if currLayer is not None:
+            [self.dlg.fieldCB.addItem(field.name(), field) for field in currLayer.fields()]
