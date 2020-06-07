@@ -25,10 +25,13 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
+from qgis.core import QgsProject
+
 # Initialize Qt resources from file resources.py
 # from .resources import *
 # Import the code for the dialog
 # from .autoNumbering_dialog import AutoNumberingDialog
+from .autoNumberingDialog import AutoNumberingDialog
 import os.path
 
 
@@ -48,6 +51,7 @@ class AutoNumbering:
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
+        self.instance = QgsProject.instance()
         locale = QSettings().value('locale/userLocale')[0:2]
         locale_path = os.path.join(
             self.plugin_dir,
@@ -169,7 +173,6 @@ class AutoNumbering:
         # will be set False in run()
         self.first_start = True
 
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -178,22 +181,32 @@ class AutoNumbering:
                 action)
             self.iface.removeToolBarIcon(action)
 
-
     def run(self):
         """Run method that performs all the real work"""
 
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-        if self.first_start == True:
+        if self.first_start:
             self.first_start = False
-            # self.dlg = AutoNumberingDialog()
+            self.dlg = AutoNumberingDialog()
 
         # show the dialog
-        # self.dlg.show()
+        self.dlg.show()
+        self.dlg.layerCB.currentTextChanged.connect(self.fillFieldCB)
+        self.fillLayerCB()
         # Run the dialog event loop
-        # result = self.dlg.exec_()
+        result = self.dlg.exec_()
         # See if OK was pressed
-        # if result:
-        #     # Do something useful here - delete the line containing pass and
-        #     # substitute with your code.
-        #     pass
+        if result:
+            # Do something useful here - delete the line containing pass and
+            # substitute with your code.
+            pass
+
+    def fillLayerCB(self):
+        self.dlg.layerCB.clear()
+        [self.dlg.layerCB.addItem(layer.name(), layer) for layer in self.instance.mapLayers().values()]
+
+    def fillFieldCB(self):
+        self.dlg.fieldCB.clear()
+        currLayer = self.dlg.layerCB.currentData()
+        [self.dlg.fieldCB.addItem(field.name(), field) for field in currLayer.fields()]
