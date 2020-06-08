@@ -66,6 +66,8 @@ class AutoNumbering:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Auto Numbering')
+        self.toolbar = self.iface.addToolBar(u'Auto Numbering')
+        self.toolbar.setObjectName(u'Auto Numbering')
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
@@ -180,6 +182,7 @@ class AutoNumbering:
                 self.tr(u'&Auto Numbering'),
                 action)
             self.iface.removeToolBarIcon(action)
+        del self.toolbar
 
     def run(self):
         """Run method that performs all the real work"""
