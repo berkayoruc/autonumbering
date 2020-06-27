@@ -1,3 +1,4 @@
+![Banner](githubsocial.png)
 Auto Numbering plugin
 =================
 
