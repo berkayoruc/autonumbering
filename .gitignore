@@ -1,0 +1,13 @@
+*.pyc 
+.vscode/
+help/
+scripts/
+test/
+.DS_Store
+Makefile
+README.html
+README.txt
+pb_tool.cfg
+plugin_upload.py
+pylintrc
+resources.qrc
