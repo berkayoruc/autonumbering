@@ -14,6 +14,9 @@ First, select the vector layer which you want to create new sorted field or modi
 
 Changelog
 ---------
+Version 0.2 - 27 June 2020
+- Order type added
+
 Version 0.1 - 27 June 2020
 - Add new field
 - Modify exist field

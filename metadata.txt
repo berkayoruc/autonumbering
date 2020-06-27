@@ -6,7 +6,7 @@
 name=Auto Numbering
 qgisMinimumVersion=3.0
 description=Auto numbering is generating numbers by selected attribute.
-version=0.1
+version=0.2
 author=Hexa Apps
 email=orucbe@itu.edu.tr
 

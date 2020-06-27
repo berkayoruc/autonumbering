@@ -9,7 +9,7 @@
         git sha              : $Format:%H$
         copyright            : (C) 2020 by Hexa Apps
         email                : orucbe@itu.edu.tr
-        version              : 0.1
+        version              : 0.2
  ***************************************************************************/
 
 /***************************************************************************
@@ -95,7 +95,7 @@ class AutoNumbering:
         msgBox.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
         return msgBox
 
-    def modifyExistField(self, layer, field=None):
+    def modifyExistField(self, features, layer, field=None):
         msgBox = self.msgBox("Auto Numbering", "Field already exist!", QMessageBox.Warning, infoText="Existing values will be lost.")
         result = msgBox.exec_()
         if result == QMessageBox.Cancel:
@@ -105,17 +105,17 @@ class AutoNumbering:
                 fieldIdx = layer.fields().indexFromName(self.dlg.fieldCB1.currentText())
             else:
                 fieldIdx = layer.fields().indexFromName(field)
-            self.modifyAttrValue(layer, fieldIdx)
+            self.modifyAttrValue(features, layer, fieldIdx)
 
-    def modifyAttrValue(self, layer, index=None, field=None):
+    def modifyAttrValue(self, features, layer, index=None, field=None):
         layer.startEditing()
         if field is None:
-            [layer.changeAttributeValue(feat.id(), index, None) for feat in layer.getFeatures()]
+            [layer.changeAttributeValue(feat.id(), index, None) for feat in features]
         else:
             layer.addAttribute(QgsField(field, QVariant.Int))
             self.fillFieldCB()
             index = layer.fields().indexFromName(field)
-        [layer.changeAttributeValue(feat.id(), index, idx+1) for idx, feat in enumerate(layer.getFeatures())]
+        [layer.changeAttributeValue(feat.id(), index, idx+1) for idx, feat in enumerate(features)]
         layer.commitChanges()
 
     def runNumbering(self):
@@ -123,22 +123,19 @@ class AutoNumbering:
         layer = self.dlg.layerCB.itemData(self.dlg.layerCB.currentIndex())
         field = self.dlg.fieldCB.itemData(self.dlg.fieldCB.currentIndex())
         fieldId = layer.fields().indexFromName(field.name())
-        sortedFeatures = sorted(layer.getFeatures(), key=lambda feat: feat[fieldId])
+        if self.dlg.orderCB.currentIndex() == 0:
+            isReverse = False
+        else:
+            isReverse = True
+        sortedFeatures = sorted(layer.getFeatures(), key=lambda feat: feat[fieldId], reverse=isReverse)
         if state and self.dlg.fieldCB1.currentText() != "":
-            self.modifyExistField(layer)
+            self.modifyExistField(sortedFeatures, layer)
         elif not state and self.dlg.newField.text() != "":
             allFields = [i.name() for i in layer.fields()]
             if self.dlg.newField.text() in allFields:
-                self.modifyExistField(layer, self.dlg.newField.text())
+                self.modifyExistField(sortedFeatures, layer, self.dlg.newField.text())
             else:
-                self.modifyAttrValue(layer, field=self.dlg.newField.text())
-
-            
-        # attributeIndex = layer.fields().indexFromName(seld.dlg.)
-        # for value, feature in sortedFeatures:
-        #     layer.changeAttributeValue(feature.id(), )
-
-        print([featt[field.name()] for featt in sortedFeatures])
+                self.modifyAttrValue(sortedFeatures, layer, field=self.dlg.newField.text())
 
     def changeCurrField(self, state):
         self.dlg.fieldCB1.setEnabled(state)
