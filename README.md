@@ -1,4 +1,4 @@
-![Banner](/images/githubsocial.png)
+![Banner](githubsocial.png)
 Auto Numbering plugin
 =================
 
