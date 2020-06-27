@@ -11,7 +11,7 @@ class AutoNumberingDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Auto Numbering")
-        self.setWindowIcon(QIcon(os.path.dirname(__file__)+'/icon.png'))
+        self.setWindowIcon(QIcon(os.path.dirname(__file__)+'/images/icon.png'))
         self.resize(300, 300)
         self.formLayout = QFormLayout(self)
         self.formLayout.setSpacing(12)

@@ -65,7 +65,7 @@ class AutoNumbering:
         return action
 
     def initGui(self):
-        icon_path = self.plugin_dir+'/icon.png'
+        icon_path = self.plugin_dir+'/images/icon.png'
         self.add_action(icon_path, text=self.tr(u'Auto number'), callback=self.run, parent=self.iface.mainWindow())
         self.dlg.layerCB.activated.connect(self.fillFieldCB)
         self.dlg.buttonBox.accepted.connect(self.runNumbering)
