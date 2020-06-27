@@ -26,7 +26,7 @@ import os.path
 from qgis.core import QgsField, QgsMapLayer, QgsProject
 from qgis.PyQt.QtCore import QCoreApplication, QSettings, QTranslator, QVariant
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QMessageBox
+from qgis.PyQt.QtWidgets import QAction, QMessageBox, QMenu
 
 from .autoNumberingDialog import AutoNumberingDialog
 
@@ -45,28 +45,24 @@ class AutoNumbering:
         self.dlg = AutoNumberingDialog()
         self.dlg.rButton2.setChecked(True)
         self.actions = []
-        self.menu = self.tr(u'&Auto Numbering')
+        self.menuTitle = self.tr(u'&Auto Numbering')
         self.toolbar = self.iface.addToolBar(u'Auto Numbering')
         self.toolbar.setObjectName(u'Auto Numbering')
 
     def tr(self, message):
         return QCoreApplication.translate('AutoNumbering', message)
 
-    def add_action(self,icon_path,text,callback,enabled_flag=True,add_to_menu=True,add_to_toolbar=True,status_tip=None,whats_this=None,parent=None):
-        icon = QIcon(icon_path)
-        action = QAction(icon, text, parent)
-        action.triggered.connect(callback)
-        action.setEnabled(enabled_flag)
-        if status_tip is not None: action.setStatusTip(status_tip)
-        if whats_this is not None: action.setWhatsThis(whats_this)
-        if add_to_toolbar: self.toolbar.addAction(action)
-        if add_to_menu: self.iface.addPluginToMenu(self.menu, action)
-        self.actions.append(action)
-        return action
-
     def initGui(self):
         icon_path = self.plugin_dir+'/images/icon.png'
-        self.add_action(icon_path, text=self.tr(u'Auto number'), callback=self.run, parent=self.iface.mainWindow())
+        self.menu = QMenu(self.menuTitle)
+        self.menu.setIcon(QIcon(icon_path))
+        self.iface.vectorMenu().addMenu(self.menu)
+        action = QAction(QIcon(icon_path), self.menuTitle, self.iface.mainWindow())
+        action.triggered.connect(self.run)
+        action.setEnabled(True)
+        self.toolbar.addAction(action)
+        self.menu.addAction(action)
+        self.actions.append(action)
         self.dlg.layerCB.activated.connect(self.fillFieldCB)
         self.dlg.buttonBox.accepted.connect(self.runNumbering)
         self.dlg.buttonBox.rejected.connect(self.dlg.close)
@@ -74,8 +70,7 @@ class AutoNumbering:
 
     def unload(self):
         for action in self.actions:
-            self.iface.removePluginMenu(
-                self.tr(u'&Auto Numbering'), action)
+            self.iface.removePluginVectorMenu(self.tr(u'&Auto Numbering'), action)
             self.iface.removeToolBarIcon(action)
         del self.toolbar
 
